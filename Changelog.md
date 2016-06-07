@@ -1,3 +1,22 @@
+# 0.5.9.1
+
+Update Nokogiri to 1.6.8, which in turn updates libxml2 to 2.9.4 and libxslt to 1.1.29,
+addressing a range of security issues. See https://groups.google.com/forum/#!topic/ruby-security-ann/RCHyF5K9Lbc
+for more details.
+
+# 0.5.9.0
+
+## Refactor
+* Remove unused mentions regex [#6810](https://github.com/diaspora/diaspora/pull/6810)
+
+## Bug fixes
+* Fix back to top button not appearing on Webkit browsers [#6782](https://github.com/diaspora/diaspora/pull/6782)
+* Don't reset the notification timestamp when marking them as read [#6821](https://github.com/diaspora/diaspora/pull/6821)
+
+## Features
+
+* The sender's diaspora-ID is now shown in invitation mails [#6817](https://github.com/diaspora/diaspora/pull/6817)
+
 # 0.5.8.0
 
 ## Refactor
