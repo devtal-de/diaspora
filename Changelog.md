@@ -1,3 +1,14 @@
+# 0.5.10.1
+
+We made a mistake and removed `mysql2` from the `Gemfile.lock` in a recent gem update. Since this could cause some issues for some installations, we decided to release a hotfix.
+
+# 0.5.10.0
+
+## Refactor
+
+* Removed the publisher from a user's photo stream due to various issues [#6851](https://github.com/diaspora/diaspora/pull/6851)
+* Don't implicitly ignore missing templateName in app.views.Base [#6877](https://github.com/diaspora/diaspora/pull/6877)
+
 # 0.5.9.1
 
 Update Nokogiri to 1.6.8, which in turn updates libxml2 to 2.9.4 and libxslt to 1.1.29,
