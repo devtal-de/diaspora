@@ -60,11 +60,11 @@ describe ApplicationHelper, :type => :helper do
       end
 
       it 'inclues jquery.js from jquery cdn' do
-        expect(jquery_include_tag).to match(/jquery\.com/)
+        expect(helper.jquery_include_tag).to match(/jquery\.com/)
       end
 
       it 'falls back to asset pipeline on cdn failure' do
-        expect(jquery_include_tag).to match(/document\.write/)
+        expect(helper.jquery_include_tag).to match(/document\.write/)
       end
     end
 
@@ -74,31 +74,30 @@ describe ApplicationHelper, :type => :helper do
       end
 
       it 'includes jquery.js from asset pipeline' do
-        expect(jquery_include_tag).to match(/jquery\.js/)
-        expect(jquery_include_tag).not_to match(/jquery\.com/)
+        expect(helper.jquery_include_tag).to match(/jquery2\.js/)
+        expect(helper.jquery_include_tag).not_to match(/jquery\.com/)
       end
     end
 
     it 'inclues jquery_ujs.js' do
-      expect(jquery_include_tag).to match(/jquery_ujs\.js/)
+      expect(helper.jquery_include_tag).to match(/jquery_ujs\.js/)
     end
 
     it "disables ajax caching" do
-      expect(jquery_include_tag).to match(/jQuery\.ajaxSetup/)
+      expect(helper.jquery_include_tag).to match(/jQuery\.ajaxSetup/)
     end
   end
 
-  describe '#changelog_url' do
-    it 'defaults to master branch changleog' do
-      AppConfig.git_revision = nil
-      expect(changelog_url).to eq('https://github.com/diaspora/diaspora/blob/master/Changelog.md')
+  describe "#changelog_url" do
+    it "defaults to master branch changleog" do
+      expect(AppConfig).to receive(:git_revision).and_return(nil)
+      expect(changelog_url).to eq("https://github.com/diaspora/diaspora/blob/master/Changelog.md")
     end
 
-    it 'displays the changelog for the current git revision if set' do
-      AppConfig.git_revision = '123'
-      expect(changelog_url).to eq('https://github.com/diaspora/diaspora/blob/123/Changelog.md')
+    it "displays the changelog for the current git revision if set" do
+      expect(AppConfig).to receive(:git_revision).twice.and_return("123")
+      expect(changelog_url).to eq("https://github.com/diaspora/diaspora/blob/123/Changelog.md")
     end
-
   end
 
   describe '#pod_name' do
@@ -108,7 +107,6 @@ describe ApplicationHelper, :type => :helper do
 
     it 'displays the supplied pod_name if it is set' do
       AppConfig.settings.pod_name = "Catspora"
-      # require 'pry'; binding.pry
       expect(pod_name).to match "Catspora"
     end
   end

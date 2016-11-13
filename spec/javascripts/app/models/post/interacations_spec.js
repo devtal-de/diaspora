@@ -1,6 +1,9 @@
 describe("app.models.Post.Interactions", function(){
+  var ajaxSuccess = {status: 200, responseText: "{\"id\": 1}"};
+
   beforeEach(function(){
-    this.interactions = factory.post().interactions;
+    this.post = factory.post();
+    this.interactions = this.post.interactions;
     this.author = factory.author({guid: "loggedInAsARockstar"});
     loginAs({guid: "loggedInAsARockstar"});
 
@@ -30,6 +33,13 @@ describe("app.models.Post.Interactions", function(){
       this.interactions.like();
       expect(this.interactions.likes.length).toEqual(1);
     });
+
+    it("sets the participation flag for the post", function() {
+      expect(this.post.get("participation")).toBeFalsy();
+      this.interactions.like();
+      jasmine.Ajax.requests.mostRecent().respondWith(ajaxSuccess);
+      expect(this.post.get("participation")).toBeTruthy();
+    });
   });
 
   describe("unlike", function(){
@@ -42,8 +52,6 @@ describe("app.models.Post.Interactions", function(){
   });
 
   describe("reshare", function() {
-    var ajaxSuccess = { status: 200, responseText: "{\"id\": 1}" };
-
     beforeEach(function(){
       this.reshare = this.interactions.post.reshare();
     });
@@ -80,6 +88,100 @@ describe("app.models.Post.Interactions", function(){
         jasmine.Ajax.requests.mostRecent().respondWith(ajaxSuccess);
         expect(app.stream.addNow).not.toHaveBeenCalled();
       });
+    });
+
+    it("sets the participation flag for the post", function() {
+      expect(this.post.get("participation")).toBeFalsy();
+      this.interactions.reshare();
+      jasmine.Ajax.requests.mostRecent().respondWith(ajaxSuccess);
+      expect(this.post.get("participation")).toBeTruthy();
+    });
+  });
+
+  describe("userLike", function(){
+    beforeEach(function() {
+      this.interactions.likes.reset([]);
+    });
+
+    it("returns false if no user liked the post", function() {
+      expect(this.interactions.userLike()).toBeFalsy();
+    });
+
+    it("returns true if only the current user liked the post", function() {
+      this.interactions.likes.add(this.userLike);
+      expect(this.interactions.userLike()).toBeTruthy();
+    });
+
+    it("returns false if only another user liked the post", function() {
+      var anotherAuthor = factory.author({guid: "anotherAuthor"});
+      var anotherLike = new app.models.Like({author : anotherAuthor});
+      this.interactions.likes.add(anotherLike);
+      expect(this.interactions.userLike()).toBeFalsy();
+    });
+
+    it("returns true if the current user and another user liked the post", function() {
+      var anotherAuthor = factory.author({guid: "anotherAuthor"});
+      var anotherLike = new app.models.Like({author : anotherAuthor});
+      this.interactions.likes.add(anotherLike);
+      this.interactions.likes.add(this.userLike);
+      expect(this.interactions.userLike()).toBeTruthy();
+    });
+
+    it("returns false if only a broken like exists", function() {
+      var brokenLike = new app.models.Like();
+      this.interactions.likes.add(brokenLike);
+      expect(this.interactions.userLike()).toBeFalsy();
+    });
+
+    it("returns true if the current user liked the post and there is a broken like", function() {
+      var brokenLike = new app.models.Like();
+      this.interactions.likes.add(brokenLike);
+      this.interactions.likes.add(this.userLike);
+      expect(this.interactions.userLike()).toBeTruthy();
+    });
+  });
+
+  describe("userReshare", function(){
+    beforeEach(function() {
+      this.interactions.reshares.reset([]);
+      this.userReshare = new app.models.Reshare({author : this.author});
+    });
+
+    it("returns false if no user reshared the post", function() {
+      expect(this.interactions.userReshare()).toBeFalsy();
+    });
+
+    it("returns true if only the current user reshared the post", function() {
+      this.interactions.reshares.add(this.userReshare);
+      expect(this.interactions.userReshare()).toBeTruthy();
+    });
+
+    it("returns false if only another user reshared the post", function() {
+      var anotherAuthor = factory.author({guid: "anotherAuthor"});
+      var anotherReshare = new app.models.Reshare({author : anotherAuthor});
+      this.interactions.reshares.add(anotherReshare);
+      expect(this.interactions.userReshare()).toBeFalsy();
+    });
+
+    it("returns true if the current user and another user reshared the post", function() {
+      var anotherAuthor = factory.author({guid: "anotherAuthor"});
+      var anotherReshare = new app.models.Reshare({author : anotherAuthor});
+      this.interactions.reshares.add(anotherReshare);
+      this.interactions.reshares.add(this.userReshare);
+      expect(this.interactions.userReshare()).toBeTruthy();
+    });
+
+    it("returns false if only a broken reshare exists", function() {
+      var brokenReshare = new app.models.Reshare();
+      this.interactions.reshares.add(brokenReshare);
+      expect(this.interactions.userReshare()).toBeFalsy();
+    });
+
+    it("returns true if the current user reshared the post and there is a broken reshare", function() {
+      var brokenReshare = new app.models.Reshare();
+      this.interactions.reshares.add(brokenReshare);
+      this.interactions.reshares.add(this.userReshare);
+      expect(this.interactions.userReshare()).toBeTruthy();
     });
   });
 });

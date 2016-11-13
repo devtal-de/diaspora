@@ -6,7 +6,7 @@ require 'spec_helper'
 
 describe ConversationsController, :type => :controller do
   before do
-    sign_in :user, alice
+    sign_in alice, scope: :user
   end
 
   describe '#new' do
@@ -23,10 +23,13 @@ describe ConversationsController, :type => :controller do
     end
 
     it "assigns a json list of contacts that are sharing with the person" do
+      sharing_user = FactoryGirl.create(:user_with_aspect)
+      sharing_user.share_with(alice.person, sharing_user.aspects.first)
       get :new, :modal => true
-      expect(assigns(:contacts_json)).to include(alice.contacts.where(:sharing => true).first.person.name)
+      expect(assigns(:contacts_json)).to include(alice.contacts.where(sharing: true, receiving: true).first.person.name)
       alice.contacts << Contact.new(:person_id => eve.person.id, :user_id => alice.id, :sharing => false, :receiving => true)
-      expect(assigns(:contacts_json)).not_to include(alice.contacts.where(:sharing => false).first.person.name)
+      expect(assigns(:contacts_json)).not_to include(alice.contacts.where(sharing: false).first.person.name)
+      expect(assigns(:contacts_json)).not_to include(alice.contacts.where(receiving: false).first.person.name)
     end
 
     it "assigns a contact if passed a contact id" do
@@ -64,7 +67,7 @@ describe ConversationsController, :type => :controller do
         author:              alice.person,
         participant_ids:     [alice.contacts.first.person.id, alice.person.id],
         subject:             "not spam",
-        messages_attributes: [{author: alice.person, text: "cool stuff"}]
+        messages_attributes: [{author: alice.person, text: "**cool stuff**"}]
       }
       @conversations = Array.new(3) { Conversation.create(hash) }
       @visibilities = @conversations.map {|conversation|
@@ -98,9 +101,17 @@ describe ConversationsController, :type => :controller do
     end
 
     it "does not let you access conversations where you are not a recipient" do
-      sign_in :user, eve
+      sign_in eve, scope: :user
       get :index, conversation_id: @conversations.first.id
       expect(assigns[:conversation]).to be_nil
+    end
+
+    it "retrieves a conversation message with out markdown content " do
+      get :index
+      @conversation = @conversations.first
+      expect(response).to be_success
+      expect(response.body).to match(/cool stuff/)
+      expect(response.body).not_to match(%r{<strong>cool stuff</strong>})
     end
   end
 
@@ -129,11 +140,10 @@ describe ConversationsController, :type => :controller do
         }.to change(Message, :count).by(1)
       end
 
-      it 'should set response with success to true and message to success message' do
+      it "responds with the conversation id as JSON" do
         post :create, @hash
-        expect(assigns[:response][:success]).to eq(true)
-        expect(assigns[:response][:message]).to eq(I18n.t('conversations.create.sent'))
-        expect(assigns[:response][:conversation_id]).to eq(Conversation.first.id)
+        expect(response).to be_success
+        expect(JSON.parse(response.body)["id"]).to eq(Conversation.first.id)
       end
 
       it 'sets the author to the current_user' do
@@ -153,9 +163,7 @@ describe ConversationsController, :type => :controller do
           }
         )
 
-        p = Postzord::Dispatcher.build(alice, cnv)
-        allow(p.class).to receive(:new).and_return(p)
-        expect(p).to receive(:post)
+        expect(Diaspora::Federation::Dispatcher).to receive(:defer_dispatch)
         post :create, @hash
       end
     end
@@ -184,11 +192,10 @@ describe ConversationsController, :type => :controller do
         }.to change(Message, :count).by(1)
       end
 
-      it 'should set response with success to true and message to success message' do
+      it "responds with the conversation id as JSON" do
         post :create, @hash
-        expect(assigns[:response][:success]).to eq(true)
-        expect(assigns[:response][:message]).to eq(I18n.t('conversations.create.sent'))
-        expect(assigns[:response][:conversation_id]).to eq(Conversation.first.id)
+        expect(response).to be_success
+        expect(JSON.parse(response.body)["id"]).to eq(Conversation.first.id)
       end
     end
 
@@ -216,10 +223,10 @@ describe ConversationsController, :type => :controller do
         expect(Message.count).to eq(count)
       end
 
-      it 'should set response with success to false and message to create fail' do
+      it "responds with an error message" do
         post :create, @hash
-        expect(assigns[:response][:success]).to eq(false)
-        expect(assigns[:response][:message]).to eq(I18n.t('conversations.create.fail'))
+        expect(response).not_to be_success
+        expect(response.body).to eq(I18n.t("conversations.create.fail"))
       end
     end
 
@@ -247,10 +254,10 @@ describe ConversationsController, :type => :controller do
         expect(Message.count).to eq(count)
       end
 
-      it 'should set response with success to false and message to fail due to no contact' do
+      it "responds with an error message" do
         post :create, @hash
-        expect(assigns[:response][:success]).to eq(false)
-        expect(assigns[:response][:message]).to eq(I18n.t('conversations.create.no_contact'))
+        expect(response).not_to be_success
+        expect(response.body).to eq(I18n.t("javascripts.conversation.create.no_recipient"))
       end
     end
 
@@ -277,6 +284,12 @@ describe ConversationsController, :type => :controller do
         post :create, @hash
         expect(Message.count).to eq(count)
       end
+
+      it "responds with an error message" do
+        post :create, @hash
+        expect(response).not_to be_success
+        expect(response.body).to eq(I18n.t("javascripts.conversation.create.no_recipient"))
+      end
     end
   end
 
@@ -291,12 +304,6 @@ describe ConversationsController, :type => :controller do
       @conversation = Conversation.create(hash)
     end
 
-    it 'succeeds with js' do
-      xhr :get, :show, :id => @conversation.id, :format => :js
-      expect(response).to be_success
-      expect(assigns[:conversation]).to eq(@conversation)
-    end
-
     it 'succeeds with json' do
       get :show, :id => @conversation.id, :format => :json
       expect(response).to be_success
@@ -307,6 +314,28 @@ describe ConversationsController, :type => :controller do
     it 'redirects to index' do
       get :show, :id => @conversation.id
       expect(response).to redirect_to(conversations_path(:conversation_id => @conversation.id))
+    end
+  end
+
+  describe "#raw" do
+    before do
+      hash = {
+        author:              alice.person,
+        participant_ids:     [alice.contacts.first.person.id, alice.person.id],
+        subject:             "not spam",
+        messages_attributes: [{author: alice.person, text: "cool stuff"}]
+      }
+      @conversation = Conversation.create(hash)
+    end
+
+    it "returns html of conversation" do
+      get :raw, conversation_id: @conversation.id
+      expect(response).to render_template(partial: "show", locals: {conversation: @conversation})
+    end
+
+    it "returns 404 when requesting non-existant conversation" do
+      get :raw, conversation_id: -1
+      expect(response).to have_http_status(404)
     end
   end
 end
