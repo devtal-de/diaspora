@@ -9,6 +9,8 @@ it:
   _contacts: "Contatti"
   _help: "Aiuto"
   _services: "Servizi"
+  _statistics: "Statistiche"
+  _terms: "Termini"
   account: "Account"
   activerecord:
     errors:
@@ -42,6 +44,7 @@ it:
     admin_bar:
       pages: "Pagine"
       pod_stats: "Statistiche pod"
+      report: "Report"
       sidekiq_monitor: "Monitor Sidekiq"
       user_search: "Cerca utente"
       weekly_user_stats: "Statistiche settimanali utenti"
@@ -73,15 +76,18 @@ it:
         zero: "%{count} utenti"
       week: "1 settimana"
     user_entry:
+      account_closed: "Account chiuso"
       email: "Email"
       guid: "GUID"
       id: "ID"
       ? "no"
       : "No"
+      unknown: "Sconosciuto"
       ? "yes"
       : Si
     user_search:
       add_invites: "Aggiungi inviti"
+      are_you_sure: "Sei sicuro di volere chiudere questo account?"
       close_account: "Chiudi l'account"
       email_to: "Email a cui mandare l'invito"
       under_13: "Mostra utenti sotto i 13 anni (Children's Online Privacy Protection Act)"
@@ -89,6 +95,7 @@ it:
         one: "trovato %{count} utente"
         other: "trovati %{count} utenti"
         zero: "trovati %{count} utenti"
+      view_profile: "Vedi profilo"
       you_currently:
         one: "al momento hai un invito a disposizione %{link}"
         other: "al momento hai %{count} inviti a disposizione %{link}"
@@ -199,6 +206,7 @@ it:
       commenting: "Invio commento in corso..."
   contacts:
     index:
+      add_contact: "Aggiungi contatto"
       all_contacts: "Tutti i contatti"
       community_spotlight: "In evidenza nella comunità"
       my_contacts: "I miei contatti"
@@ -207,6 +215,7 @@ it:
       only_sharing_with_me: "Condividono con me"
       start_a_conversation: "Inizia una conversazione"
       title: "Contatti"
+      user_search: "Cerca tra i contatti"
     spotlight:
       community_spotlight: "In evidenza nella comunità"
       suggest_member: "Suggerisci un utente"
@@ -222,6 +231,7 @@ it:
       send: "Invia"
       sending: "Invio in corso..."
       subject: "Oggetto"
+      subject_default: "Senza oggetto"
       to: "A"
     new_conversation:
       fail: "Messaggio non valido"
@@ -239,6 +249,19 @@ it:
   error_messages:
     helper:
       correct_the_following_errors_and_try_again: "Correggi i seguenti errori e riprova."
+  errors:
+    messages:
+      carrierwave_download_error: "non può essere scaricato"
+      carrierwave_integrity_error: "Tipo di file non ammesso"
+      carrierwave_processing_error: "processo fallito"
+      content_type_blacklist_error: "Non è possibile caricare questi tipi di files %{content_type}"
+      content_type_whitelist_error: "Non è possibile caricare files %{content_type}"
+      extension_blacklist_error: "Non puoi caricare i files tipo %{extension}, i files non ammessi sono %{prohibited_types}"
+      extension_whitelist_error: "Questo tipo di file  %{extension} non è compatibile, i file compatibili sono %{allowed_types}"
+      max_size_error: "Il file non può essere più grande di %{max_size}"
+      min_size_error: "Il file non può essere più piccolo di %{min_size}"
+      mini_magick_processing_error: "File non processabile con MiniMagik, potrebbe non essere un immagine ? Errore %{e}"
+      rmagick_processing_error: "Il file non può essere processato da rmagic, potrebbe non essere un'immagine"
   fill_me_out: "Scrivi qui"
   find_people: "Cerca persone o #tag"
   help:
@@ -259,8 +282,6 @@ it:
       change_aspect_of_post_q: "Dopo aver postato qualcosa posso cambiare gli aspetti a cui è visibile?"
       contacts_know_aspect_a: "No. Non possono sapere in nessun caso il nome dell'aspetto di cui fanno parte."
       contacts_know_aspect_q: "I miei contatti possono scoprire in quali aspetti li ho messi?"
-      contacts_visible_a: "Se scegli questa opzione, i contatti di quell'aspetto potranno vedere tutti gli altri che ne fanno parte sotto la tua immagine. E' opportuno scegliere questa opzione solo se i contatti nell'aspetto si conoscono già tra loro. Comunque non potranno sapere il nome che hai dato all'aspetto."
-      contacts_visible_q: "Cosa significa \"rendi i contatti in questo aspetto visibili gli uni agli altri\"?"
       delete_aspect_a: "Nella lista dei tuoi aspetti, sulla colonna laterale della pagina principale, passa con il mouse sull'aspetto che vuoi eliminare. Clicca sulla piccola matita che comparirà a destra. Nel riquadro che comparirà dovrai premere il bottone per eliminare l'aspetto."
       delete_aspect_q: "Come posso eliminare un aspetto?"
       person_multiple_aspects_a: "Sì. Vai alla pagina dei contatti. Per ogni contatto potrai usare il menu a destra per aggiungerlo o toglierlo da quanti aspetti vorrai. Oppure potrai aggiungerlo a un aspetto (o rimuoverlo) cliccando sul bottone di selezione degli aspetti presente sul suo profilo. Puoi anche passare con il mouse sul nome. Comparirà la scheda del contatto con la possibilità di gestire gli aspetti."
@@ -293,6 +314,13 @@ it:
     getting_started_tutorial: "Serie di tutorial \"per inziare\""
     here: "qui"
     irc: "IRC"
+    keyboard_shortcuts:
+      keyboard_shortcuts_li1: "j - passa al post successivo"
+      keyboard_shortcuts_li2: "k - passa al post precedente"
+      keyboard_shortcuts_li3: "c - commenta questo post"
+      keyboard_shortcuts_li4: "l - metti un like al post"
+      keyboard_shortcuts_q: "Quali sono le scorciatoie da tastiera disponibili?"
+      title: "Scorciatoie da tastiera"
     markdown: "Markdown"
     mentions:
       how_to_mention_a: "Scrivi il carattere \"@\" e inizia a scrivere il nome della persona. Comparirà un menù a tendina da cui potrai scegliere facilmente il contatto corretto. È possibile menzionare solamente persone che hai già aggiunto ad un aspetto."
@@ -525,6 +553,16 @@ it:
       click_link: "Per attivare la nuova email %{unconfirmed_email} vai a questo indirizzo:"
       subject: "Per favore attiva il tuo nuovo indirizzo email %{unconfirmed_email}"
     email_sent_by_diaspora: "Questo messaggio è stato spedito da %{pod_name}. Se non vuoi ricevere questo tipo di email,"
+    export_email:
+      body: |-
+          Ciao %{name},
+
+          I tuoi dati sono stati elaborati e sono pronti per essere scaricati a [questo link](%{url}).
+
+          ciao
+
+          L'email robot di diaspora*
+      subject: "%{name}, i tuoi dati personali sono pronti per essere scaricati"
     hello: "Ciao %{name}!"
     invite:
       message: |-
@@ -646,12 +684,18 @@ it:
       password_confirmation: "CONFERMA PASSWORD"
       sign_up: "ISCRIVITI"
       submitting: "Invio in corso..."
+      terms: "Creando un account accetti i %{terms_link}"
       terms_link: "termini di servizio"
       username: "NOME UTENTE"
   report:
     confirm_deletion: "Sei sicuro di volerlo eliminare?"
     delete_link: "Elimina elemento"
+    not_found: "Il post o il commento non è stato trovato. Sembra sia stato cancellato dall'utente!"
+    post_label: "<strong>Post</strong>: %{content}"
     reason_label: "Motivo:"
+    status:
+      failed: "Qualcosa è andato storto"
+    title: "Panoramica report"
   reshares:
     comment_email_subject: "La condivisione di %{resharer} del post di %{author}"
     reshare:
@@ -731,9 +775,11 @@ it:
   statistics:
     disabled: "Non disponibile"
     enabled: "Disponibile"
+    name: "Nome"
     total_users: "Utenti totali"
     version: "Versione"
   status_messages:
+    bad_aspects: "L'IDs inserito non è corretto (o non esiste o è sbagliato)"
     new:
       mentioning: "Stai menzionando: %{person}"
     too_long: "Per favore, commenta con meno di %{count} carattere. Al momento sono %{current_length} caratteri"
@@ -799,6 +845,7 @@ it:
       comment_on_post: "qualcuno commenta un tuo post"
       current_password: "Password attuale"
       current_password_expl: "quella con cui accedi..."
+      download_export: "Scarica il mio profilo"
       edit_account: "Modifica account"
       email_awaiting_confirmation: "Il link di attivazione è stato spedito a %{unconfirmed_email}. Continueremo ad usare la tua email originale %{email} finché non cliccherai sul link e attiverai il nuovo indirizzo."
       export_data: "Esporta dati"
